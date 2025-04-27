@@ -1,6 +1,6 @@
 import { SOCKET_EVENTS } from '../constants/socketEvents.js';
 import { generateRoomCode } from '../utils/generateRoomCode.js';
-import { addUserToRoom, getUsersInRoom, removeUserFromRoom } from '../services/rooms.js';
+import { addUserToRoom, getUsersInRoom, removeUserFromRoom } from '../services/room.js';
 
 export const handleSocketEvents = (io, socket) => {
   socket.on(SOCKET_EVENTS.JOIN_ROOM, ({ roomCode, isSender }) => {
