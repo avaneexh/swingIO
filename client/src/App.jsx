@@ -4,7 +4,6 @@ import LobbyScreen from './screens/Lobby'
 
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
