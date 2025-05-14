@@ -1,6 +1,6 @@
 import React, {useCallback, useState, useEffect } from 'react'
 import { useSocket } from './../context/SocketProvider';
-
+import { useNavigate } from "react-router-dom"
 
 
 
@@ -16,6 +16,7 @@ function LobbyScreen() {
 
     console.log(socket);
     
+    const navigate = useNavigate();
 
 
     const handleSubmitForm = useCallback((e) =>{
@@ -27,7 +28,9 @@ function LobbyScreen() {
     }, [email, room, socket]);
 
     const handleJoinRoom = useCallback((data) => {
-        
+        const { email, room } = data
+       // console.log("from backend", email, room);
+        navigate(`/room/${room}`)
     }, [])
  
     useEffect(()=>{
