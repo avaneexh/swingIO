@@ -1,22 +1,18 @@
+// server.js (Node + Socket.IO)
 import { Server } from "socket.io";
 
-
-const io = new Server(7000, {
-  cors: true,
-});
-
-const emailToSocketIdMap = new Map();
-const socketidToEmailMap = new Map();
+const io = new Server(7000, { cors: true });
 
 io.on("connection", (socket) => {
-  console.log(`Socket Connected`, socket.id);
+  console.log("Socket connected:", socket.id);
+
   socket.on("room:join", (data) => {
     const { email, room } = data;
-    emailToSocketIdMap.set(email, socket.id);
-    socketidToEmailMap.set(socket.id, email);
-    io.to(room).emit("user:joined", { email, id: socket.id });
     socket.join(room);
-    io.to(socket.id).emit("room:join", data);
+    // notify others in room that a user joined
+    socket.to(room).emit("user:joined", { email, id: socket.id });
+    // also inform the joining client that they joined (optional)
+    socket.emit("room:join", data);
   });
 
   socket.on("user:call", ({ to, offer }) => {
@@ -28,12 +24,21 @@ io.on("connection", (socket) => {
   });
 
   socket.on("peer:nego:needed", ({ to, offer }) => {
-    console.log("peer:nego:needed", offer);
     io.to(to).emit("peer:nego:needed", { from: socket.id, offer });
   });
 
   socket.on("peer:nego:done", ({ to, ans }) => {
-    console.log("peer:nego:done", ans);
     io.to(to).emit("peer:nego:final", { from: socket.id, ans });
+  });
+
+  // NEW: forward ICE candidates
+  socket.on("ice-candidate", ({ to, candidate }) => {
+    if (!to || !candidate) return;
+    io.to(to).emit("ice-candidate", { from: socket.id, candidate });
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+    // optionally notify others
   });
 });
