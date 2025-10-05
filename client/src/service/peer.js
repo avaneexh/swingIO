@@ -1,4 +1,3 @@
-// src/service/peer.js
 class PeerService {
   constructor() {
     if (!this.peer) {

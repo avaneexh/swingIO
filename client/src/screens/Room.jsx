@@ -1,11 +1,13 @@
-// src/pages/Room.jsx
 import React, { useEffect, useCallback, useState, useRef } from "react";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
+import { useParams } from "react-router-dom";
+
 
 const CHUNK_SIZE = 16 * 1024; // 16KB
 
 const Room = () => {
+  const { roomId } = useParams(); 
   const socket = useSocket();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState(null);
@@ -102,7 +104,7 @@ const Room = () => {
   // === Handle Call Accepted
   const handleCallAccepted = useCallback(async ({ ans }) => {
     await peer.setRemoteDescriptionFromAnswer(ans);
-    remoteDescriptionSet.current = true; // ✅
+    remoteDescriptionSet.current = true; 
     flushPendingCandidates();
   }, []);
 
@@ -231,7 +233,9 @@ const Room = () => {
   // === UI
   return (
     <div style={{ padding: 16 }}>
-      <h2>🎥 Room</h2>
+      <div style={{ marginBottom: 12 }}>
+        <strong>📌 Room Code:</strong> {roomId}
+      </div>
       <div>
         <strong>Status:</strong>{" "}
         {remoteSocketId ? <span style={{ color: "green" }}>Connected</span> : <span>Waiting</span>}
