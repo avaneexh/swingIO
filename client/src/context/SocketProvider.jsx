@@ -9,7 +9,7 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = (props) => {
-  const socket = useMemo(() => io("https://swingio.onrender.com/"), []);
+  const socket = useMemo(() => io("https://swingio.onrender.com"), []);
 
   return (
     <SocketContext.Provider value={socket}>
