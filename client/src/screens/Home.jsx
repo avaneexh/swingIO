@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useSocket } from "../context/SocketProvider";
+import Navbar from "../Components/Navbar";
 
 const Home = () => {
   const navigate = useNavigate();
@@ -35,6 +36,8 @@ const Home = () => {
   };
 
   return (
+  <>
+   <Navbar/>
     <div className="relative flex flex-col items-center justify-center h-screen overflow-hidden bg-gradient-to-b from-[#0e0e12] to-[#1a0b2e] text-white">
       {/* Moving Balls Background */}
       {[
@@ -105,6 +108,7 @@ const Home = () => {
         </motion.button>
       </motion.div>
     </div>
+    </>
   );
 };
 

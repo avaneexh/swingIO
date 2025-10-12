@@ -1,0 +1,79 @@
+# =========================
+# Global
+# =========================
+node_modules/
+dist/
+build/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# =========================
+# React Client (Frontend)
+# =========================
+client/node_modules/
+client/build/
+client/dist/
+client/.env
+client/.env.local
+client/.env.development.local
+client/.env.production.local
+
+# React cache
+client/.parcel-cache
+client/.next/
+client/.vercel/
+client/.turbo/
+client/.eslintcache
+
+# =========================
+# Express Server (Backend)
+# =========================
+server/node_modules/
+server/dist/
+server/build/
+server/.env
+server/.env.local
+
+# PM2 or forever logs
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# TypeScript build files
+*.tsbuildinfo
+
+# =========================
+# Misc
+# =========================
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
