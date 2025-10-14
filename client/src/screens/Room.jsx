@@ -2,6 +2,8 @@ import React, { useEffect, useCallback, useState, useRef } from "react";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
 import { useParams } from "react-router-dom";
+import { Copy, Send, Paperclip, Loader2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 
 const CHUNK_SIZE = 16 * 1024; // 16KB
@@ -9,6 +11,7 @@ const CHUNK_SIZE = 16 * 1024; // 16KB
 const Room = () => {
   const { roomId } = useParams(); 
   const socket = useSocket();
+  const navigate = useNavigate();
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
@@ -230,67 +233,143 @@ const Room = () => {
     setFileProgress(null);
   };
 
+  const handleCopyRoomCode = () => {
+    navigator.clipboard.writeText(roomId)
+      .then(() => {
+        console.log("Room code copied to clipboard!");
+      })
+      .catch((err) => {
+        console.error("Failed to copy room code: ", err);
+      });
+  };
+
+
   // === UI
   return (
-    <div style={{ padding: 16 }}>
-      <div style={{ marginBottom: 12 }}>
-        <strong>📌 Room Code:</strong> {roomId}
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
+      {/* Header */}
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow p-4 flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            📌 Room Code:
+            <span className="font-mono text-indigo-600">{roomId}</span>
+          </h2>
+        </div>
+        <button
+          onClick={handleCopyRoomCode}
+          className="p-2 rounded-full hover:bg-gray-200 transition"
+          title="Copy Room Code"
+        >
+          <Copy size={20} />
+        </button>
       </div>
-      <div>
+
+      {/* Connection Status */}
+      <div className="mt-3 text-gray-600">
         <strong>Status:</strong>{" "}
-        {remoteSocketId ? <span style={{ color: "green" }}>Connected</span> : <span>Waiting</span>}
-      </div>
-
-      <div style={{ display: "flex", gap: 12, marginTop: 12 }}>
-        <div>
-          <h4>My Stream</h4>
-          {myStream ? (
-            <video playsInline muted autoPlay ref={(v) => v && (v.srcObject = myStream)} width={300} height={180} />
-          ) : (
-            <div style={{ width: 300, height: 180, background: "#222" }} />
-          )}
-        </div>
-
-        <div>
-          <h4>Remote Stream</h4>
-          {remoteStream ? (
-            <video playsInline autoPlay ref={(v) => v && (v.srcObject = remoteStream)} width={300} height={180} />
-          ) : (
-            <div style={{ width: 300, height: 180, background: "#222" }} />
-          )}
-        </div>
-      </div>
-
-      <div style={{ marginTop: 18 }}>
-        <div style={{ border: "1px solid #ddd", height: 200, overflowY: "auto", padding: 8 }}>
-          {chatLog.map((c, i) =>
-            c.sender === "remote-file" ? (
-              <div key={i}>
-                <div>File received: {c.text} ({c.size} bytes)</div>
-                <a href={c.url} download={c.text}>Download {c.text}</a>
-              </div>
-            ) : (
-              <div key={i} style={{ textAlign: c.sender === "me" ? "right" : "left", margin: 4 }}>
-                <span style={{ display: "inline-block", padding: 6, background: "#fff", borderRadius: 6, color: "black" }}>
-                  {c.text}
-                </span>
-              </div>
-            )
-          )}
-        </div>
-
-        {fileProgress && (
-          <div style={{ marginTop: 8 }}>
-            Sending {fileProgress.name}: {((fileProgress.sent / fileProgress.total) * 100).toFixed(1)}%
-          </div>
+        {remoteSocketId ? (
+          <span className="text-green-600 font-medium">Connected</span>
+        ) : (
+          <span className="text-yellow-600 font-medium">Waiting...</span>
         )}
+      </div>
 
-        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-          <input value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Type a message..." style={{ flex: 1, padding: 8 }} />
-          <button onClick={handleSendMessage}>Send</button>
-          <input type="file" onChange={handleFileSelect} />
+      {/* Chat Section */}
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow mt-6 flex flex-col h-[500px] overflow-hidden">
+        {/* Chat Box */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-100">
+          {chatLog.map((c, i) => {
+            if (c.sender === "remote-file") {
+              return (
+                <div key={i} className="flex justify-start">
+                  <div className="bg-white p-3 rounded-lg shadow-sm border text-sm max-w-[80%]">
+                    <div className="font-medium text-gray-800">
+                      📎 {c.text}
+                    </div>
+                    <a
+                      href={c.url}
+                      download={c.text}
+                      className="text-indigo-600 text-xs underline mt-1 inline-block"
+                    >
+                      Download File ({(c.size / 1024).toFixed(1)} KB)
+                    </a>
+                  </div>
+                </div>
+              );
+            }
+
+            if (c.sender === "me-file") {
+              return (
+                <div key={i} className="flex justify-end">
+                  <div className="bg-indigo-500 text-white p-3 rounded-lg shadow-sm max-w-[80%] flex items-center gap-2">
+                    <div>📎 {c.text}</div>
+                    {fileProgress && fileProgress.name === c.text && (
+                      <div className="relative w-5 h-5">
+                        <div className="absolute inset-0 border-2 border-white/50 rounded-full"></div>
+                        <div
+                          className="absolute inset-0 border-2 border-white rounded-full"
+                          style={{
+                            clipPath: `inset(${100 - (fileProgress.sent / fileProgress.total) * 100}% 0 0 0)`,
+                          }}
+                        ></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div
+                key={i}
+                className={`flex ${c.sender === "me" ? "justify-end" : "justify-start"}`}
+              >
+                <div
+                  className={`${
+                    c.sender === "me"
+                      ? "bg-indigo-500 text-white"
+                      : "bg-white text-gray-800"
+                  } p-3 rounded-lg shadow-sm max-w-[75%]`}
+                >
+                  {c.text}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Message Input */}
+        <div className="p-3 border-t bg-white flex items-center gap-3">
+          <label className="p-2 rounded-full hover:bg-gray-200 cursor-pointer">
+            <Paperclip size={20} />
+            <input
+              type="file"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
+          </label>
+          <input
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
+          />
+          <button
+            onClick={handleSendMessage}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-full p-2 transition"
+          >
+            <Send size={20} />
+          </button>
         </div>
       </div>
+
+      {/* File Upload Progress (optional separate display) */}
+      {fileProgress && (
+        <div className="mt-4 text-sm text-gray-600">
+          Sending <strong>{fileProgress.name}</strong>:{" "}
+          {((fileProgress.sent / fileProgress.total) * 100).toFixed(1)}%
+        </div>
+      )}
     </div>
   );
 };
