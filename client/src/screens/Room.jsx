@@ -6,7 +6,7 @@ import { Copy, Send, Paperclip, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 
-const CHUNK_SIZE = 16 * 1024; // 16KB
+const CHUNK_SIZE = 16 * 1024; 
 
 const Room = () => {
   const { roomId } = useParams(); 
@@ -21,8 +21,8 @@ const Room = () => {
 
   const isNegotiating = useRef(false);
   const incomingFileStore = useRef({});
-  const pendingCandidates = useRef([]); // ✅ store ICE candidates temporarily
-  const remoteDescriptionSet = useRef(false); // ✅ flag for ICE handling
+  const pendingCandidates = useRef([]); 
+  const remoteDescriptionSet = useRef(false); 
 
   // Add local media tracks
   const addLocalTracks = useCallback((stream) => {
@@ -99,8 +99,7 @@ const Room = () => {
 
     const ans = await peer.getAnswer(offer);
     socket.emit("call:accepted", { to: from, ans });
-    remoteDescriptionSet.current = true; // ✅ mark after setRemoteDescription
-    // flush buffered candidates
+    remoteDescriptionSet.current = true;
     flushPendingCandidates();
   }, [addLocalTracks, handleDataMessage, handleDataOpen, handleDataClose, socket]);
 
