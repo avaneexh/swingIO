@@ -162,13 +162,33 @@ const Room = () => {
   const handleNegoNeeded = useCallback(async () => {
     if (isNegotiating.current) return;
     isNegotiating.current = true;
+
     try {
+      const pc = peer.getRTCPeerConnection();
+
+      // ✅ Wait for signaling state to stabilize (important for Safari/Edge)
+      if (pc.signalingState !== "stable") {
+        await new Promise((resolve) => {
+          const check = setInterval(() => {
+            if (pc.signalingState === "stable") {
+              clearInterval(check);
+              resolve();
+            }
+          }, 100);
+        });
+      }
+
+      // ✅ Create a fresh offer safely (rollback already handled inside getOffer)
       const offer = await peer.getOffer();
+
       socket.emit("peer:nego:needed", { offer, to: remoteSocketId });
+    } catch (err) {
+      console.error("Negotiation error:", err);
     } finally {
       isNegotiating.current = false;
     }
   }, [remoteSocketId, socket]);
+
 
   useEffect(() => {
     const pc = peer.getRTCPeerConnection();
