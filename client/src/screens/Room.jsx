@@ -262,6 +262,38 @@ const Room = () => {
       });
   };
 
+ useEffect(() => {
+  const navEntries = performance.getEntriesByType("navigation");
+  const navigationType = navEntries.length > 0 ? navEntries[0].type : "navigate";
+
+  console.log("Navigation type:", navigationType);
+
+  if (navigationType === "reload") {
+    // 🧹 Clear browser caches & storage
+    sessionStorage.clear();
+    localStorage.clear();
+
+    // 🧭 Clear history stack (so user can't go back)
+    window.history.pushState(null, "", "/404");
+    window.history.replaceState(null, "", "/404");
+
+    // 🧼 Optionally clear any service workers cache (for PWA/Vite cache issues)
+    if ("caches" in window) {
+      caches.keys().then(names => {
+        for (let name of names) caches.delete(name);
+      });
+    }
+
+    // ⛔ Prevent going back to old page after reload
+    window.onpopstate = function () {
+      navigate("/", { replace: true });
+    };
+
+  }
+}, [navigate]);
+
+
+  
 
   // === UI
   return (
