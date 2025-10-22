@@ -272,22 +272,14 @@ const Room = () => {
     // 🧹 Clear browser caches & storage
     sessionStorage.clear();
     localStorage.clear();
+    const generateRoomCode = () =>
+      Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    // 🧭 Clear history stack (so user can't go back)
-    window.history.pushState(null, "", "/404");
-    window.history.replaceState(null, "", "/404");
-
-    // 🧼 Optionally clear any service workers cache (for PWA/Vite cache issues)
-    if ("caches" in window) {
-      caches.keys().then(names => {
-        for (let name of names) caches.delete(name);
-      });
-    }
-
-    // ⛔ Prevent going back to old page after reload
-    window.onpopstate = function () {
-      navigate("/", { replace: true });
-    };
+    
+      const roomCode = generateRoomCode();
+      socket.emit("create-room", { roomCode });
+      navigate(`/room/${roomCode}`);
+ 
 
   }
 }, [navigate]);
@@ -306,13 +298,20 @@ const Room = () => {
             <span className="font-mono text-indigo-600">{roomId}</span>
           </h2>
         </div>
-        <button
-          onClick={handleCopyRoomCode}
-          className="p-2 rounded-full hover:bg-gray-200 transition"
-          title="Copy Room Code"
-        >
+
+        {!remoteSocketId ? (
+          <button
+            onClick={handleCopyRoomCode}
+            className="p-2 rounded-full hover:bg-gray-200 transition"
+            title="Copy Room Code"
+          >
           <Copy size={20} />
         </button>
+        ) : (
+          ""
+        )}
+
+        
       </div>
 
       {/* Connection Status */}
