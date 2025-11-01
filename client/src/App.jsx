@@ -4,10 +4,12 @@ import LobbyScreen from "./screens/Lobby";
 import Room from "./screens/Room.jsx";
 import Home from "./screens/Home.jsx";
 import NotFound from "./screens/NotFound.jsx";
+import Navbar from "./Components/Navbar.jsx";
 
 function App() {
   return (
     <div className="App">
+      <Navbar/>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/lobby" element={<LobbyScreen />} />
