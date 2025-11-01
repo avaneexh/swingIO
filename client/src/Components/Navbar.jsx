@@ -1,24 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Moon, Sun, Menu, X } from "lucide-react";
+import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
-  const [darkMode, setDarkMode] = useState(false);
+  const { dark, toggle } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  // Toggle dark mode
-  useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
+  console.log("dark", dark);
+  
 
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Brand Name */}
+          {/* Brand */}
           <div className="flex items-center">
             <h1 className="text-2xl font-bold cursor-pointer">
               <span className="text-blue-500">Swing</span>
@@ -33,23 +28,17 @@ const Navbar = () => {
             <button className="text-gray-800 dark:text-gray-200 hover:text-blue-500 transition">Features</button>
 
             {/* Dark Mode Toggle */}
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            <button onClick={toggle} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+              {dark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           </div>
 
-          {/* Mobile Menu Button */}
+          {/* Mobile Menu */}
           <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="mr-3 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-            >
-              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
+            <button onClick={toggle} className="mr-3 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+              {dark ? <Sun size={20} /> : <Moon size={20} />}
             </button>
-            <button onClick={() => setMenuOpen(!menuOpen)}>
+            <button onClick={() => setMenuOpen((s) => !s)}>
               {menuOpen ? <X size={26} className="text-gray-800 dark:text-gray-200" /> : <Menu size={26} className="text-gray-800 dark:text-gray-200" />}
             </button>
           </div>
@@ -71,4 +60,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
- 

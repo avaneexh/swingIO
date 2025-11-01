@@ -262,27 +262,7 @@ const Room = () => {
       });
   };
 
- useEffect(() => {
-  const navEntries = performance.getEntriesByType("navigation");
-  const navigationType = navEntries.length > 0 ? navEntries[0].type : "navigate";
 
-  console.log("Navigation type:", navigationType);
-
-  if (navigationType === "reload") {
-    // 🧹 Clear browser caches & storage
-    sessionStorage.clear();
-    localStorage.clear();
-    const generateRoomCode = () =>
-      Math.random().toString(36).substring(2, 8).toUpperCase();
-
-    
-      const roomCode = generateRoomCode();
-      socket.emit("create-room", { roomCode });
-      navigate(`/room/${roomCode}`);
- 
-
-  }
-}, [navigate]);
 
 
   
