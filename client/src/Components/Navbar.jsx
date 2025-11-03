@@ -3,10 +3,10 @@ import { Moon, Sun, Menu, X } from "lucide-react";
 import { useTheme } from "../context/ThemeContext";
 
 const Navbar = () => {
-  const { dark, toggle } = useTheme();
+  const { darkMode, toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
-  console.log("dark", dark);
+  console.log("dark", darkMode);
   
 
   return (
@@ -28,15 +28,15 @@ const Navbar = () => {
             <button className="text-gray-800 dark:text-gray-200 hover:text-blue-500 transition">Features</button>
 
             {/* Dark Mode Toggle */}
-            <button onClick={toggle} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-              {dark ? <Sun size={20} /> : <Moon size={20} />}
+            <button onClick={toggleTheme} className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
           </div>
 
           {/* Mobile Menu */}
           <div className="md:hidden flex items-center">
-            <button onClick={toggle} className="mr-3 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-              {dark ? <Sun size={20} /> : <Moon size={20} />}
+            <button onClick={toggleTheme} className="mr-3 p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+              {darkMode ? <Sun size={20} /> : <Moon size={20} />}
             </button>
             <button onClick={() => setMenuOpen((s) => !s)}>
               {menuOpen ? <X size={26} className="text-gray-800 dark:text-gray-200" /> : <Menu size={26} className="text-gray-800 dark:text-gray-200" />}
