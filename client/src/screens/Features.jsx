@@ -1,37 +1,21 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { Sun, Moon } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { useTheme } from "../context/ThemeContext";
 
-const NotFound = () => {
-  const [isDark, setIsDark] = useState(true);
+const Features = () => {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const navigate = useNavigate();
   const { darkMode } = useTheme();
 
-  // Mouse parallax movement
   useEffect(() => {
     const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX / window.innerWidth, y: e.clientY / window.innerHeight });
+      setMousePos({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      });
     };
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      if (location.pathname === "/404") {
-        navigate("/", { replace: true });
-      }
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [location.pathname, navigate]);
-
-
-
 
   return (
     <div
@@ -39,59 +23,50 @@ const NotFound = () => {
         darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"
       }`}
     >
-      {/* Parallax Glows */}
+      {/* Animated Background Lights */}
       <motion.div
         className={`absolute w-[320px] h-[320px] rounded-full blur-3xl opacity-25 ${
-          darkMode ? "bg-purple-600" : "bg-purple-400"
+          darkMode ? "bg-indigo-600" : "bg-indigo-400"
         }`}
         animate={{
-          x: (mousePos.x - 0.5) * 120,
+          x: (mousePos.x - 0.5) * 100,
           y: (mousePos.y - 0.5) * 100,
         }}
         transition={{ type: "spring", stiffness: 30, damping: 20 }}
       />
       <motion.div
-        className={`absolute w-[240px] h-[240px] rounded-full blur-3xl opacity-25 ${
-          darkMode ? "bg-blue-500" : "bg-blue-300"
-        }`}
-        animate={{
-          x: (mousePos.x - 0.5) * -100,
-          y: (mousePos.y - 0.5) * -80,
-        }}
-        transition={{ type: "spring", stiffness: 30, damping: 20 }}
-      />
-      <motion.div
-        className={`absolute w-[180px] h-[180px] rounded-full blur-3xl opacity-20 ${
+        className={`absolute w-[200px] h-[200px] rounded-full blur-3xl opacity-25 ${
           darkMode ? "bg-pink-500" : "bg-pink-300"
         }`}
         animate={{
-          x: (mousePos.x - 0.5) * 60,
-          y: (mousePos.y - 0.5) * 70,
+          x: (mousePos.x - 0.5) * -100,
+          y: (mousePos.y - 0.5) * -90,
         }}
         transition={{ type: "spring", stiffness: 30, damping: 20 }}
       />
 
-      {/* Main Content */}
+      {/* Content */}
       <div className="relative z-10 text-center px-6">
-        <h1 className="text-8xl sm:text-9xl font-extrabold tracking-tight mb-2">
-          404
+        <h1 className="text-6xl sm:text-7xl font-extrabold tracking-tight mb-4">
+          Features
         </h1>
         <p
-          className={`text-2xl sm:text-3xl font-semibold ${
-            darkMode ? "text-gray-100" : "text-gray-800"
+          className={`text-lg sm:text-xl font-medium ${
+            darkMode ? "text-gray-300" : "text-gray-700"
           }`}
         >
-          Page Not Found
+          We’re adding incredible features to{" "}
+          <span className="text-blue-500 font-semibold">Swing.Io</span> 💫
         </p>
         <p
           className={`mt-3 text-base sm:text-lg ${
             darkMode ? "text-gray-400" : "text-gray-500"
           }`}
         >
-          The page you’re looking for doesn’t exist or may have been moved.
+          This page is still under development. Check back soon to explore all
+          the magic!
         </p>
 
-        {/* Go Home Button */}
         <a
           href="/"
           className={`mt-8 inline-block px-8 py-3 rounded-2xl font-semibold shadow-md transition-all duration-300 ${
@@ -107,4 +82,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default Features;

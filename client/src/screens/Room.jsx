@@ -2,8 +2,10 @@ import React, { useEffect, useCallback, useState, useRef } from "react";
 import peer from "../service/peer";
 import { useSocket } from "../context/SocketProvider";
 import { useParams } from "react-router-dom";
-import { Copy, Send, Paperclip, Loader2 } from "lucide-react";
+import { Copy, Send, Paperclip, ArrowDown  } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "../context/ThemeContext";
+
 
 
 const CHUNK_SIZE = 16 * 1024; 
@@ -12,6 +14,9 @@ const Room = () => {
   const { roomId } = useParams(); 
   const socket = useSocket();
   const navigate = useNavigate();
+  const { darkMode } = useTheme();
+  const chatContainerRef = useRef(null);
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [remoteSocketId, setRemoteSocketId] = useState(null);
   const [myStream, setMyStream] = useState(null);
   const [remoteStream, setRemoteStream] = useState(null);
@@ -262,140 +267,242 @@ const Room = () => {
       });
   };
 
+  useEffect(() => {
+    if (!isScrolledUp) {
+      chatContainerRef.current?.scrollTo({
+        top: chatContainerRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [chatLog, fileProgress]);
 
+  const handleScroll = () => {
+    const el = chatContainerRef.current;
+    if (!el) return;
+    const atBottom = el.scrollHeight - el.scrollTop <= el.clientHeight + 10;
+    setIsScrolledUp(!atBottom);
+  };
 
+  const scrollToBottom = () => {
+    chatContainerRef.current?.scrollTo({
+      top: chatContainerRef.current.scrollHeight,
+      behavior: "smooth",
+    });
+    setIsScrolledUp(false);
+  };
 
   
 
-  // === UI
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col items-center p-6">
+    <div
+      className={`h-screen flex flex-col items-center p-6 transition-colors duration-700 pt-16  ${
+        darkMode
+          ? "bg-gradient-to-br from-[#0e0e12] via-[#1a0b2e] to-[#2d0f4b] text-gray-100"
+          : "bg-gray-50 text-gray-900"
+      }`}
+    >
       {/* Header */}
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow p-4 flex items-center justify-between">
+      <div
+        className={`w-full max-w-2xl rounded-2xl p-4 flex items-center justify-between shadow transition-all duration-500 ${
+          darkMode ? "bg-gray-900 border border-gray-800" : "bg-white"
+        }`}
+      >
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+          <h2
+            className={`text-xl font-semibold flex items-center gap-2 ${
+              darkMode ? "text-gray-100" : "text-gray-800"
+            }`}
+          >
             📌 Room Code:
-            <span className="font-mono text-indigo-600">{roomId}</span>
+            <span
+              className={`font-mono ${
+                darkMode ? "text-indigo-400" : "text-indigo-600"
+              }`}
+            >
+              {roomId}
+            </span>
           </h2>
         </div>
 
-        {!remoteSocketId ? (
+        {!remoteSocketId && (
           <button
             onClick={handleCopyRoomCode}
-            className="p-2 rounded-full hover:bg-gray-200 transition"
+            className={`p-2 rounded-full transition ${
+              darkMode
+                ? "hover:bg-gray-800 text-gray-300"
+                : "hover:bg-gray-200 text-gray-700"
+            }`}
             title="Copy Room Code"
           >
-          <Copy size={20} />
-        </button>
-        ) : (
-          ""
+            <Copy size={20} />
+          </button>
         )}
-
-        
       </div>
 
       {/* Connection Status */}
-      <div className="mt-3 text-gray-600">
+      <div
+        className={`mt-3 ${
+          darkMode ? "text-gray-400" : "text-gray-600"
+        } transition-colors`}
+      >
         <strong>Status:</strong>{" "}
         {remoteSocketId ? (
-          <span className="text-green-600 font-medium">Connected</span>
+          <span className="text-green-500 font-medium">Connected</span>
         ) : (
-          <span className="text-yellow-600 font-medium">Waiting...</span>
+          <span className="text-yellow-500 font-medium">Waiting...</span>
         )}
       </div>
 
       {/* Chat Section */}
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow mt-6 flex flex-col h-[500px] overflow-hidden">
-        {/* Chat Box */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-2 bg-gray-100">
-          {chatLog.map((c, i) => {
-            if (c.sender === "remote-file") {
-              return (
-                <div key={i} className="flex justify-start">
-                  <div className="bg-white p-3 rounded-lg shadow-sm border text-sm max-w-[80%]">
-                    <div className="font-medium text-gray-800">
-                      📎 {c.text}
-                    </div>
-                    <a
-                      href={c.url}
-                      download={c.text}
-                      className="text-indigo-600 text-xs underline mt-1 inline-block"
-                    >
-                      Download File ({(c.size / 1024).toFixed(1)} KB)
-                    </a>
-                  </div>
-                </div>
-              );
-            }
-
-            if (c.sender === "me-file") {
-              return (
-                <div key={i} className="flex justify-end">
-                  <div className="bg-indigo-500 text-white p-3 rounded-lg shadow-sm max-w-[80%] flex items-center gap-2">
-                    <div>📎 {c.text}</div>
-                    {fileProgress && fileProgress.name === c.text && (
-                      <div className="relative w-5 h-5">
-                        <div className="absolute inset-0 border-2 border-white/50 rounded-full"></div>
-                        <div
-                          className="absolute inset-0 border-2 border-white rounded-full"
-                          style={{
-                            clipPath: `inset(${100 - (fileProgress.sent / fileProgress.total) * 100}% 0 0 0)`,
-                          }}
-                        ></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            }
-
+      <div
+        className={`w-full max-w-2xl rounded-2xl shadow mt-6 flex flex-col h-[500px] overflow-hidden transition-colors duration-500 ${
+          darkMode
+            ? "bg-gray-900 border border-gray-800"
+            : "bg-white border border-gray-200"
+        }`}
+      >
+      {/* Chat Box */}
+      <div
+        ref={chatContainerRef}
+        onScroll={handleScroll}
+        className={`flex-1 overflow-y-auto p-4 space-y-2 transition-colors relative ${
+          darkMode ? "bg-gray-950" : "bg-gray-100"
+        } scrollbar-hide`}
+      >
+        {chatLog.map((c, i) => {
+          if (c.sender === "remote-file") {
             return (
-              <div
-                key={i}
-                className={`flex ${c.sender === "me" ? "justify-end" : "justify-start"}`}
-              >
+              <div key={i} className="flex justify-start">
                 <div
-                  className={`${
-                    c.sender === "me"
-                      ? "bg-indigo-500 text-white"
-                      : "bg-white text-gray-800"
-                  } p-3 rounded-lg shadow-sm max-w-[75%]`}
+                  className={`p-3 rounded-lg shadow-sm border text-sm max-w-[80%] ${
+                    darkMode
+                      ? "bg-gray-800 border-gray-700 text-gray-200"
+                      : "bg-white border-gray-200 text-gray-800"
+                  }`}
                 >
-                  {c.text}
+                  <div className="font-medium">📎 {c.text}</div>
+                  <a
+                    href={c.url}
+                    download={c.text}
+                    className={`text-xs underline mt-1 inline-block ${
+                      darkMode ? "text-indigo-400" : "text-indigo-600"
+                    }`}
+                  >
+                    Download File ({(c.size / 1024).toFixed(1)} KB)
+                  </a>
                 </div>
               </div>
             );
-          })}
-        </div>
+          }
 
-        {/* Message Input */}
-        <div className="p-3 border-t bg-white flex items-center gap-3">
-          <label className="p-2 rounded-full hover:bg-gray-200 cursor-pointer">
-            <Paperclip size={20} />
-            <input
-              type="file"
-              onChange={handleFileSelect}
-              className="hidden"
-            />
-          </label>
-          <input
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            placeholder="Type a message..."
-            className="flex-1 border rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-800"
-          />
+          if (c.sender === "me-file") {
+            return (
+              <div key={i} className="flex justify-end">
+                <div className="bg-indigo-500 text-white p-3 rounded-lg shadow-sm max-w-[80%] flex items-center gap-2">
+                  <div>📎 {c.text}</div>
+                  {fileProgress && fileProgress.name === c.text && (
+                    <div className="relative w-5 h-5">
+                      <div className="absolute inset-0 border-2 border-white/50 rounded-full"></div>
+                      <div
+                        className="absolute inset-0 border-2 border-white rounded-full"
+                        style={{
+                          clipPath: `inset(${
+                            100 -
+                            (fileProgress.sent / fileProgress.total) * 100
+                          }% 0 0 0)`,
+                        }}
+                      ></div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          return (
+            <div
+              key={i}
+              className={`flex ${
+                c.sender === "me" ? "justify-end" : "justify-start"
+              }`}
+            >
+              <div
+                className={`p-3 rounded-lg shadow-sm max-w-[75%] ${
+                  c.sender === "me"
+                    ? "bg-indigo-500 text-white"
+                    : darkMode
+                    ? "bg-gray-800 text-gray-100"
+                    : "bg-white text-gray-800"
+                }`}
+              >
+                {c.text}
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Scroll to Bottom Button */}
+        {isScrolledUp && (
           <button
-            onClick={handleSendMessage}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-full p-2 transition"
+            onClick={scrollToBottom}
+            className={`absolute bottom-3 left-1/2 -translate-x-1/2 p-2 rounded-full shadow-md transition-all duration-300 ${
+              darkMode
+                ? "bg-indigo-600 hover:bg-indigo-700 text-white"
+                : "bg-indigo-500 hover:bg-indigo-600 text-white"
+            }`}
           >
-            <Send size={20} />
+            <ArrowDown size={20} />
           </button>
-        </div>
+        )}
+
       </div>
 
-      {/* File Upload Progress (optional separate display) */}
+      {/* Message Input */}
+      <div
+        className={`p-3 border-t flex items-center gap-3 transition-colors duration-500 ${
+          darkMode ? "bg-gray-900 border-gray-800" : "bg-white border-gray-200"
+        }`}
+      >
+        <label
+          className={`p-2 rounded-full cursor-pointer transition ${
+            darkMode ? "hover:bg-gray-800" : "hover:bg-gray-200"
+          }`}
+        >
+          <Paperclip size={20} />
+          <input type="file" onChange={handleFileSelect} className="hidden" />
+        </label>
+        <input
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              // e.preventDefault();
+              handleSendMessage();
+            }
+          }}
+          placeholder="Type a message..."
+          className={`flex-1 rounded-full px-4 py-2 focus:outline-none focus:ring-2 text-sm sm:text-base transition duration-300 ${
+            darkMode
+              ? "bg-gray-800 text-white placeholder-gray-500 border border-gray-700 focus:ring-indigo-500"
+              : "bg-white text-gray-800 border border-gray-300 focus:ring-indigo-500"
+          }`}
+        />
+        <button
+          onClick={handleSendMessage}
+          className="bg-indigo-500 hover:bg-indigo-600 text-white rounded-full p-2 transition"
+        >
+          <Send size={20} />
+        </button>
+      </div>
+    </div>
+
+      {/* File Upload Progress */}
       {fileProgress && (
-        <div className="mt-4 text-sm text-gray-600">
+        <div
+          className={`mt-4 text-sm transition-colors ${
+            darkMode ? "text-gray-400" : "text-gray-600"
+          }`}
+        >
           Sending <strong>{fileProgress.name}</strong>:{" "}
           {((fileProgress.sent / fileProgress.total) * 100).toFixed(1)}%
         </div>
