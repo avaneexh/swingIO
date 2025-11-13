@@ -90,7 +90,7 @@ const Home = () => {
               darkMode ? "text-gray-300" : "text-gray-700"
             }`}
           >
-            Unleash seamless file sharing — powered by real-time technology.
+            Unleash seamless chatting and file sharing — powered by real-time technology.
           </p>
         </motion.div>
 
